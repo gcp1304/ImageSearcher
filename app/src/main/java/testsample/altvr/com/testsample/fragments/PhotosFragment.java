@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -79,6 +80,8 @@ public class PhotosFragment extends Fragment{
 
         @Override
         public void itemClicked(ItemsListAdapter.ItemViewHolder rowView, int position) {
+            PhotoVo photoVo = mItemsData.get(position);
+            Toast.makeText(getActivity(), "Clicked on type " + photoVo.type, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -89,6 +92,8 @@ public class PhotosFragment extends Fragment{
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
+        log.d("Invoking getDeaultPhotos API of Pixabay");
+        mService.getDefaultPhotos();
     }
 
     @Override
@@ -116,7 +121,16 @@ public class PhotosFragment extends Fragment{
          *
          * For part 2b you should update this to handle the case where the user has saved photos.
          */
-
+        log.d("Received success message on event bus into fragment");
+        fetchingItems.setVisibility(View.GONE);
+        mItemsData.clear();
+        if (event.data != null) {
+            mItemsData.addAll(event.data);
+        } else {
+            //TODO Show Snackbar
+        }
+        mItemsData.addAll(mDatabaseUtil.getAllPhotos());
+        mListAdapter.notifyDataSetChanged();
 
     }
 
@@ -129,6 +143,13 @@ public class PhotosFragment extends Fragment{
          *
          * For part 1a you should clear the fragment and notify the user of the error.
          */
+        //TODO Snackbar
+        if (event.errorDescription.equals(getString(R.string.network_error))) {
+            fetchingItems.setVisibility(View.GONE);
+            mItemsData.clear();
+            mItemsData.addAll(mDatabaseUtil.getAllPhotos());
+            mListAdapter.notifyDataSetChanged();
+        }
     }
 
 }

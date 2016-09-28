@@ -36,11 +36,16 @@ public class DatabaseUtil extends SQLiteOpenHelper {
     private static final String KEY_PHOTO_ID = "id";
     private static final String KEY_PHOTO = "photo";
 
+    private static String[] allColumns = {KEY_PHOTO_ID, KEY_PHOTO};
+
     SQLiteDatabase mDb;
+
+    private Gson mGson;
 
     public DatabaseUtil(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         mDb = getWritableDatabase();
+        mGson = new Gson();
     }
 
     @Override
@@ -62,5 +67,37 @@ public class DatabaseUtil extends SQLiteOpenHelper {
      * For part 1b, you should fill in the various CRUD operations below to manipulate the db
      * returned by getWritableDatabase() to store/load photos.
      */
+
+    public boolean insert(PhotoVo photoVo) {
+        ContentValues values = new ContentValues();
+        values.put(KEY_PHOTO_ID, photoVo.id);
+        values.put(KEY_PHOTO, mGson.toJson(photoVo));
+        return mDb.insert(TABLE_PHOTOS, null, values) != -1;
+    }
+
+    public void delete(String id) {
+        mDb.delete(TABLE_PHOTOS, KEY_PHOTO_ID+"=?", new String[]{id});
+    }
+
+    public boolean exists(String id) {
+        Cursor cursor = mDb.query(TABLE_PHOTOS, new String[] {KEY_PHOTO}, KEY_PHOTO_ID+"=?", new String[]{id}, null, null, null);
+        return cursor != null && cursor.getCount() > 0;
+    }
+
+    public List<PhotoVo> getAllPhotos() {
+        List<PhotoVo> list = new ArrayList<>();
+        //Instead of all columns string array, if we pass null we can get all columns
+        // but just for readability created a string array
+        Cursor cursor = mDb.query(TABLE_PHOTOS, allColumns, null, null, null, null, null, null);
+        if (cursor != null && cursor.getCount() > 0 && cursor.moveToFirst()) {
+            while (!cursor.isAfterLast()) {
+                list.add(mGson.fromJson(cursor.getString(cursor.getColumnIndex(KEY_PHOTO)), PhotoVo.class));
+                cursor.moveToNext();
+            }
+        }
+
+        cursor.close();
+        return list;
+    }
 
 }

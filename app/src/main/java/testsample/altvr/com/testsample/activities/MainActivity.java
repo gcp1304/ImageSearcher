@@ -64,12 +64,14 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean onQueryTextSubmit(String query) {
             mSearchView.clearFocus();
+            mService.searchPhotos(query);
             return true;
         }
     };
 
     private void displayFragment(Fragment fragment, int title) {
         setTitle(title);
+        log.d("Displaying Fragment");
         getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainer, fragment).commit();
     }
 }
