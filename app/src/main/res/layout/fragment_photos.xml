@@ -27,17 +27,17 @@
     </LinearLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/pull_to_refresh"
+        android:id="@+id/swipeToRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/photosListRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        tools:listitem="@layout/adapter_photos_item" />
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/photosListRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            tools:listitem="@layout/adapter_photos_item" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
 

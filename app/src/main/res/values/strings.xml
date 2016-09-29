@@ -15,6 +15,9 @@
     <string name="unsaved">Unsaved</string>
     <string name="save">Save</string>
     <string name="unsave">Unsave</string>
+    <string name="action_add_favourite">Add to Favourites</string>
+    <string name="action_save">@string/save</string>
+    <string name="action_unsave">@string/unsave</string>
 
 
 </resources>

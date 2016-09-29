@@ -8,8 +8,12 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -26,7 +30,7 @@ import testsample.altvr.com.testsample.util.ItemImageTransformation;
 import testsample.altvr.com.testsample.util.LogUtil;
 import testsample.altvr.com.testsample.vo.PhotoVo;
 
-public class ItemsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener {
+public class ItemsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private LogUtil log = new LogUtil(ItemsListAdapter.class);
     public static final int TYPE_HEADER = 1;
     public static final int TYPE_ITEM = 0;
@@ -39,29 +43,6 @@ public class ItemsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private Context mContext;
     private DatabaseUtil mDbUtil;
     private PhotoVo mPhotoVo;
-
-    @Override
-    public void onClick(View view) {
-
-        // When the text was save
-        if (((TextView) view).getText().equals(mContext.getResources().getString(R.string.save))) {
-            mDbUtil.insert(mPhotoVo);
-            ((TextView) view).setText(mContext.getResources().getString(R.string.unsave));
-            Toast.makeText(mContext, R.string.saved, Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        // When the text was unsave
-        if (((TextView) view).getText().equals(mContext.getResources().getString(R.string.unsave))) {
-        // This function should never be called when the image is not present in DB hence no need to check for photo presence in device
-            //if (mDbUtil.exists(mPhotoVo.id)) {
-                mDbUtil.delete(mPhotoVo.id);
-                Toast.makeText(mContext, R.string.unsaved, Toast.LENGTH_LONG).show();
-                ((TextView) view).setText(mContext.getResources().getString(R.string.save));
-                return;
-            //}
-        }
-    }
 
     public interface ItemListener {
         void itemClicked(ItemViewHolder rowView, int position);
@@ -118,15 +99,62 @@ public class ItemsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
 
 
-        itemViewHolder.itemName.setText(mContext.getResources().getText(R.string.tags) + mPhotoVo.tags);
-        if (mDbUtil.exists(mPhotoVo.id)) {
-            itemViewHolder.saveText.setText(mContext.getResources().getString(R.string.unsave));
-        } else {
-            itemViewHolder.saveText.setText(mContext.getResources().getString(R.string.save));
-        }
 
-        itemViewHolder.saveText.setOnClickListener(this);
+        itemViewHolder.itemName.setText(mContext.getResources().getText(R.string.tags) + mPhotoVo.tags);
+        itemViewHolder.overflow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showPopupMenu(view);
+            }
+        });
+
         //mListener.itemClicked(itemViewHolder, position);
+    }
+
+    /**
+     * Showing pop up menu when tapping on 3 dots
+     * @param view
+     */
+    private void showPopupMenu(View view) {
+        // Inflate menu
+        PopupMenu popup = new PopupMenu(mContext, view);
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.menu_photo, popup.getMenu());
+        Menu menu = popup.getMenu();
+        if (mDbUtil.exists(mPhotoVo.id)) {
+            menu.findItem(R.id.action_unsave).setVisible(true);
+            menu.findItem(R.id.action_save).setVisible(false);
+        } else {
+            menu.findItem(R.id.action_save).setVisible(true);
+            menu.findItem(R.id.action_unsave).setVisible(false);
+        }
+        popup.setOnMenuItemClickListener(new PopupMenuItemClickListener());
+        popup.show();
+    }
+
+    /**
+     * Click listener for popup menu items
+     */
+    class PopupMenuItemClickListener implements PopupMenu.OnMenuItemClickListener {
+
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.action_save:
+                    mDbUtil.insert(mPhotoVo);
+                    Toast.makeText(mContext, R.string.saved, Toast.LENGTH_LONG).show();
+                    return true;
+                case R.id.action_unsave:
+                    mDbUtil.delete(mPhotoVo.id);
+                    Toast.makeText(mContext, R.string.unsaved, Toast.LENGTH_LONG).show();
+                    return true;
+                case R.id.action_add_favourite:
+                    Toast.makeText(mContext, "Added to favourites", Toast.LENGTH_LONG).show();
+                    return true;
+                default:
+            }
+            return false;
+        }
     }
 
     @Override
@@ -147,15 +175,14 @@ public class ItemsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     public static class ItemViewHolder extends RecyclerView.ViewHolder {
-        public ImageView itemImage;
+        public ImageView itemImage, overflow;
         public TextView itemName;
-        public TextView saveText;
 
         public ItemViewHolder(View itemView) {
             super(itemView);
             itemName = (TextView) itemView.findViewById(R.id.itemName);
             itemImage = (ImageView) itemView.findViewById(R.id.itemImage);
-            saveText = (TextView) itemView.findViewById(R.id.saveText);
+            overflow = (ImageView) itemView.findViewById(R.id.overflow);
         }
     }
 }

@@ -31,6 +31,7 @@ public class PhotosFragment extends Fragment{
     private LogUtil log = new LogUtil(PhotosFragment.class);
     private LinearLayout fetchingItems;
     private RecyclerView itemsListRecyclerView;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
     private ApiService mService;
 
     private ArrayList<PhotoVo> mItemsData = new ArrayList<>();
@@ -60,13 +61,22 @@ public class PhotosFragment extends Fragment{
     private void initViews(View view) {
         fetchingItems = (LinearLayout) view.findViewById(R.id.listEmptyView);
         itemsListRecyclerView = (RecyclerView) view.findViewById(R.id.photosListRecyclerView);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeToRefresh);
     }
 
     private void setupViews() {
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mService.getDefaultPhotos();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
         fetchingItems.setVisibility(View.VISIBLE);
         setupItemsList();
         EventBus.getDefault().register(this);
     }
+
 
     private void setupItemsList() {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
