@@ -3,6 +3,8 @@ package testsample.altvr.com.testsample.activities;
 import android.app.SearchManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -16,15 +18,17 @@ import testsample.altvr.com.testsample.fragments.PhotosFragment;
 import testsample.altvr.com.testsample.service.ApiService;
 import testsample.altvr.com.testsample.util.LogUtil;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PhotosFragment.OnEventListener {
     private LogUtil log = new LogUtil(MainActivity.class);
     private ApiService mService;
     SearchView mSearchView;
+    CoordinatorLayout mRootLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mRootLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
         mService = new ApiService(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -73,5 +77,10 @@ public class MainActivity extends AppCompatActivity {
         setTitle(title);
         log.d("Displaying Fragment");
         getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainer, fragment).commit();
+    }
+
+    @Override
+    public void onEventOccurred(String message) {
+        Snackbar.make(mRootLayout, message, Snackbar.LENGTH_LONG).show();
     }
 }

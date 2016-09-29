@@ -1,5 +1,6 @@
 package testsample.altvr.com.testsample.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -19,6 +20,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 
 import testsample.altvr.com.testsample.R;
+import testsample.altvr.com.testsample.activities.MainActivity;
 import testsample.altvr.com.testsample.adapter.ItemsListAdapter;
 import testsample.altvr.com.testsample.events.ApiErrorEvent;
 import testsample.altvr.com.testsample.events.PhotosEvent;
@@ -38,9 +40,24 @@ public class PhotosFragment extends Fragment{
     private ItemsListAdapter mListAdapter;
     private DatabaseUtil mDatabaseUtil;
 
+    private OnEventListener mCallback;
+
 
     public static PhotosFragment newInstance() {
         return new PhotosFragment();
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            mCallback = (OnEventListener) activity;
+        }
+        catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnEventListener");
+        }
     }
 
     @Override
@@ -138,6 +155,9 @@ public class PhotosFragment extends Fragment{
             mItemsData.addAll(event.data);
         } else {
             //TODO Show Snackbar
+            //Snackbar.make(getActivity(), R.string.no_results_found, Snackbar.LENGTH_LONG).show();
+            mCallback.onEventOccurred(getResources().getString(R.string.no_results_found));
+
         }
         mItemsData.addAll(mDatabaseUtil.getAllPhotos());
         mListAdapter.notifyDataSetChanged();
@@ -154,12 +174,18 @@ public class PhotosFragment extends Fragment{
          * For part 1a you should clear the fragment and notify the user of the error.
          */
         //TODO Snackbar
+        mCallback.onEventOccurred(event.errorDescription);
         if (event.errorDescription.equals(getString(R.string.network_error))) {
             fetchingItems.setVisibility(View.GONE);
             mItemsData.clear();
             mItemsData.addAll(mDatabaseUtil.getAllPhotos());
             mListAdapter.notifyDataSetChanged();
         }
+    }
+
+    // Container Activity must implement this interface
+    public interface OnEventListener {
+        public void onEventOccurred(String message);
     }
 
 }
