@@ -154,8 +154,6 @@ public class PhotosFragment extends Fragment{
         if (event.data != null) {
             mItemsData.addAll(event.data);
         } else {
-            //TODO Show Snackbar
-            //Snackbar.make(getActivity(), R.string.no_results_found, Snackbar.LENGTH_LONG).show();
             mCallback.onEventOccurred(getResources().getString(R.string.no_results_found));
 
         }
