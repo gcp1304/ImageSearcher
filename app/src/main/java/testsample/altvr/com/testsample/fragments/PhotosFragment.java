@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -96,22 +99,33 @@ public class PhotosFragment extends Fragment{
 
 
     private void setupItemsList() {
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
-        itemsListRecyclerView.setLayoutManager(linearLayoutManager);
-        itemsListRecyclerView.setHasFixedSize(true);
-        mListAdapter = new ItemsListAdapter(mItemsData, new ItemClickedListener(), getResources().getDisplayMetrics().widthPixels, getContext());
+        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getActivity(), 2);
+        itemsListRecyclerView.setLayoutManager(mLayoutManager);
+        itemsListRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mListAdapter = new ItemsListAdapter(mItemsData, getResources().getDisplayMetrics().widthPixels, getContext());
         itemsListRecyclerView.setAdapter(mListAdapter);
-    }
 
-    private class ItemClickedListener implements ItemsListAdapter.ItemListener {
+        itemsListRecyclerView.addOnItemTouchListener(new ItemsListAdapter.RecyclerTouchListener(
+                getActivity(), itemsListRecyclerView, new ItemsListAdapter.OnPhotoClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("photos", mItemsData);
+                bundle.putInt("position", position);
 
-        @Override
-        public void itemClicked(ItemsListAdapter.ItemViewHolder rowView, int position) {
-            PhotoVo photoVo = mItemsData.get(position);
-            Toast.makeText(getActivity(), "Clicked on type " + photoVo.type, Toast.LENGTH_LONG).show();
+                SlideShowDialogFragment newFragment = SlideShowDialogFragment.newInstance();
+                newFragment.setArguments(bundle);
+                newFragment.show(getActivity().getSupportFragmentManager(), "slideShow");
+
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+
+            }
         }
+        ));
     }
-
 
     @Override
     public void onResume() {
@@ -119,7 +133,6 @@ public class PhotosFragment extends Fragment{
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
-        log.d("Invoking getDeaultPhotos API of Pixabay");
         mService.getDefaultPhotos();
     }
 
@@ -148,7 +161,6 @@ public class PhotosFragment extends Fragment{
          *
          * For part 2b you should update this to handle the case where the user has saved photos.
          */
-        log.d("Received success message on event bus into fragment");
         fetchingItems.setVisibility(View.GONE);
         mItemsData.clear();
         if (event.data != null) {
@@ -171,7 +183,6 @@ public class PhotosFragment extends Fragment{
          *
          * For part 1a you should clear the fragment and notify the user of the error.
          */
-        //TODO Snackbar
         mCallback.onEventOccurred(event.errorDescription);
         if (event.errorDescription.equals(getString(R.string.network_error))) {
             fetchingItems.setVisibility(View.GONE);
