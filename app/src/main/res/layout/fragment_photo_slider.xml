@@ -57,6 +57,6 @@
             android:textStyle="bold"
             android:maxLines="2"
             android:ellipsize="end"/>
-    </LinearLayout>
+</LinearLayout>
 
 </RelativeLayout>
