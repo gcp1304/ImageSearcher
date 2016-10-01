@@ -4,61 +4,59 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
 import testsample.altvr.com.testsample.R;
-import testsample.altvr.com.testsample.util.DatabaseUtil;
 import testsample.altvr.com.testsample.util.ItemImageTransformation;
 import testsample.altvr.com.testsample.util.LogUtil;
 import testsample.altvr.com.testsample.vo.PhotoVo;
 
 public class ItemsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private LogUtil log = new LogUtil(ItemsListAdapter.class);
-    public static final int TYPE_HEADER = 1;
-    public static final int TYPE_ITEM = 0;
 
     private static final int INVALID_DIMEN = -1;
 
-    private final ItemListener mListener;
     private final int mImageWidth;
     private List<PhotoVo> mItems;
     private Context mContext;
-    private DatabaseUtil mDbUtil;
     private PhotoVo mPhotoVo;
 
-    public interface ItemListener {
-        void itemClicked(ItemViewHolder rowView, int position);
+    public static class ItemViewHolder extends RecyclerView.ViewHolder {
+        public ImageView thumbnail;
+        public ImageView overflow;
+        public TextView tags;
+
+        public ItemViewHolder(View itemView) {
+            super(itemView);
+            thumbnail = (ImageView) itemView.findViewById(R.id.thumbnail);
+            overflow = (ImageView) itemView.findViewById(R.id.overflow);
+            tags = (TextView) itemView.findViewById(R.id.itemName);
+        }
     }
 
-    public ItemsListAdapter(List<PhotoVo> items, ItemListener listener, int imageWidth, Context context) {
+    public ItemsListAdapter(List<PhotoVo> items, int imageWidth, Context context) {
         mItems = items;
-        mListener = listener;
         mImageWidth = imageWidth;
         mContext = context;
-        mDbUtil = new DatabaseUtil(mContext);
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, final int viewType) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.adapter_photos_item, viewGroup, false);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.thumbnail, viewGroup, false);
         return new ItemViewHolder(view);
     }
 
@@ -76,93 +74,25 @@ public class ItemsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
          */
         ItemViewHolder itemViewHolder = (ItemViewHolder) holder;
         mPhotoVo = mItems.get(position);
-        Context context = itemViewHolder.itemView.getContext();
 
         Bitmap createBitmap = Bitmap.createBitmap(16, 9, Bitmap.Config.RGB_565);
         Canvas canvas = new Canvas(createBitmap);
-        canvas.drawColor(context.getColor(R.color.list_item_background));
-        Drawable bitmapDrawable = new BitmapDrawable(context.getResources(), createBitmap);
+        canvas.drawColor(mContext.getColor(R.color.list_item_background));
+        Drawable bitmapDrawable = new BitmapDrawable(mContext.getResources(), createBitmap);
 
         //Load images from server
-
         if (isImageSizeGiven()) {
-            Picasso.with(context)
+            Picasso.with(mContext)
                     .load(mPhotoVo.webformatURL)
                     .transform(new ItemImageTransformation(mImageWidth))
                     .error(bitmapDrawable)
-                    .into(itemViewHolder.itemImage);
+                    .into(itemViewHolder.thumbnail);
         } else {
-            Picasso.with(context)
+            Picasso.with(mContext)
                     .load(mPhotoVo.webformatURL)
                     .error(bitmapDrawable)
-                    .into(itemViewHolder.itemImage);
+                    .into(itemViewHolder.thumbnail);
         }
-
-
-
-        itemViewHolder.itemName.setText(mContext.getResources().getText(R.string.tags) + mPhotoVo.tags);
-        itemViewHolder.overflow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showPopupMenu(view);
-            }
-        });
-
-        //mListener.itemClicked(itemViewHolder, position);
-    }
-
-    /**
-     * Showing pop up menu when tapping on 3 dots
-     * @param view
-     */
-    private void showPopupMenu(View view) {
-        // Inflate menu
-        PopupMenu popup = new PopupMenu(mContext, view);
-        MenuInflater inflater = popup.getMenuInflater();
-        inflater.inflate(R.menu.menu_photo, popup.getMenu());
-        Menu menu = popup.getMenu();
-        if (mDbUtil.exists(mPhotoVo.id)) {
-            menu.findItem(R.id.action_unsave).setVisible(true);
-            menu.findItem(R.id.action_save).setVisible(false);
-        } else {
-            menu.findItem(R.id.action_save).setVisible(true);
-            menu.findItem(R.id.action_unsave).setVisible(false);
-        }
-        popup.setOnMenuItemClickListener(new PopupMenuItemClickListener());
-        popup.show();
-    }
-
-    /**
-     * Click listener for popup menu items
-     */
-    class PopupMenuItemClickListener implements PopupMenu.OnMenuItemClickListener {
-
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.action_save:
-                    mDbUtil.insert(mPhotoVo);
-                    Toast.makeText(mContext, R.string.saved, Toast.LENGTH_LONG).show();
-                    return true;
-                case R.id.action_unsave:
-                    mDbUtil.delete(mPhotoVo.id);
-                    Toast.makeText(mContext, R.string.unsaved, Toast.LENGTH_LONG).show();
-                    return true;
-                case R.id.action_add_favourite:
-                    Toast.makeText(mContext, "Added to favourites", Toast.LENGTH_LONG).show();
-                    return true;
-                default:
-            }
-            return false;
-        }
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        if (position == 0) {
-            return TYPE_HEADER;
-        }
-        return TYPE_ITEM;
     }
 
     private boolean isImageSizeGiven() {
@@ -174,15 +104,52 @@ public class ItemsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return mItems.size();
     }
 
-    public static class ItemViewHolder extends RecyclerView.ViewHolder {
-        public ImageView itemImage, overflow;
-        public TextView itemName;
+    public interface OnPhotoClickListener {
+        void onClick(View view, int position);
+        void onLongClick(View view, int position);
+    }
 
-        public ItemViewHolder(View itemView) {
-            super(itemView);
-            itemName = (TextView) itemView.findViewById(R.id.itemName);
-            itemImage = (ImageView) itemView.findViewById(R.id.itemImage);
-            overflow = (ImageView) itemView.findViewById(R.id.overflow);
+    public static class RecyclerTouchListener implements RecyclerView.OnItemTouchListener {
+
+        private GestureDetector gestureDetector;
+        private ItemsListAdapter.OnPhotoClickListener clickListener;
+
+        public RecyclerTouchListener(Context context, final RecyclerView recyclerView, final ItemsListAdapter.OnPhotoClickListener clickListener) {
+            this.clickListener = clickListener;
+            gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onSingleTapUp(MotionEvent e) {
+                    return true;
+                }
+
+                @Override
+                public void onLongPress(MotionEvent e) {
+                    View child = recyclerView.findChildViewUnder(e.getX(), e.getY());
+                    if (child != null && clickListener != null) {
+                        clickListener.onLongClick(child, recyclerView.getChildPosition(child));
+                    }
+                }
+            });
+        }
+
+        @Override
+        public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+
+            View child = rv.findChildViewUnder(e.getX(), e.getY());
+            if (child != null && clickListener != null && gestureDetector.onTouchEvent(e)) {
+                clickListener.onClick(child, rv.getChildPosition(child));
+            }
+            return false;
+        }
+
+        @Override
+        public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+        }
+
+        @Override
+        public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
         }
     }
+
 }
