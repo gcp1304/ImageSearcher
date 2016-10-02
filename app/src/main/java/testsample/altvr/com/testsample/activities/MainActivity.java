@@ -137,6 +137,7 @@ public class MainActivity extends AppCompatActivity implements PhotosFragment.On
 
         @Override
         public boolean onQueryTextSubmit(String query) {
+            mTabLayout.getTabAt(0).select();
             mSearchView.clearFocus();
             mService.searchPhotos(query);
             return true;
