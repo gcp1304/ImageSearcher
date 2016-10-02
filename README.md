@@ -24,6 +24,8 @@ Image searcher application has 3 tabs setup as mentioned below :
 
 ## API Reference
 
+https://pixabay.com/api/docs/
+
 ## Required Libraries
 
 - Android appcompat v7
@@ -45,5 +47,6 @@ This project doesn't include any unit tests.
 ## Contributors
 
 [Altspace](https://github.com/AltspaceVR)
+
 [Chandra Gopalaiah](https://github.com/gcp1304)
 
