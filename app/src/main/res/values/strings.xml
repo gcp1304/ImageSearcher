@@ -15,9 +15,19 @@
     <string name="unsaved">Unsaved</string>
     <string name="save">Save</string>
     <string name="unsave">Unsave</string>
-    <string name="action_add_favourite">Add to Favourites</string>
+    <string name="action_add_favorite">Add favorite</string>
+    <string name="action_remove_favorite">Remove favorite</string>
     <string name="action_save">@string/save</string>
     <string name="action_unsave">@string/unsave</string>
     <string name="credits">Credits:\u0020 </string>
+    <string name="all_photos">All</string>
+    <string name="saved_photos">Saved</string>
+    <string name="favorite_photos">Favorite</string>
+    <string name="saved_empty_message">You haven\'t saved any photos</string>
+    <string name="favorite_empty_message">You haven\'t added any favorite photos</string>
+    <string name="add_to_favorite_button">@string/action_add_favorite</string>
+    <string name="save_photos_button">Save Photos</string>
+    <string name="added_to_favorites">Added to favorites</string>
+    <string name="removed_from_favorites">Removed from favorites</string>
 
 </resources>

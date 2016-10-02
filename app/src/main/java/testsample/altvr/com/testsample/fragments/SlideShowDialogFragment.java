@@ -26,9 +26,13 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 
+import testsample.altvr.com.testsample.Constants;
 import testsample.altvr.com.testsample.R;
+import testsample.altvr.com.testsample.events.SaveOrFavChangeEvent;
 import testsample.altvr.com.testsample.util.DatabaseUtil;
 import testsample.altvr.com.testsample.util.LogUtil;
 import testsample.altvr.com.testsample.vo.PhotoVo;
@@ -42,9 +46,14 @@ public class SlideShowDialogFragment extends DialogFragment {
     private ImageView mOverFlow;
     private PhotosViewPagerAdapter mPagerAdapter;
     private DatabaseUtil mDbUtil;
+    private EventBus mEventBus;
 
     public static SlideShowDialogFragment newInstance() {
         return new SlideShowDialogFragment();
+    }
+
+    public SlideShowDialogFragment() {
+        mEventBus = EventBus.getDefault();
     }
 
     @Nullable
@@ -55,15 +64,12 @@ public class SlideShowDialogFragment extends DialogFragment {
         mCountTV = (TextView) view.findViewById(R.id.count);
         mTagsTV = (TextView) view.findViewById(R.id.tags);
         mOverFlow = (ImageView) view.findViewById(R.id.overflow);
-        mOverFlow.setColorFilter(Color.parseColor("#FFFFFF"));
+        mOverFlow.setColorFilter(Color.parseColor("#d7e2f7"));
         mPhotographerTV = (TextView) view.findViewById(R.id.photographer);
         mDbUtil = new DatabaseUtil(getActivity());
 
         mPhotosList = (ArrayList<PhotoVo>) getArguments().getSerializable("photos");
         selectedPosition = getArguments().getInt("position");
-
-        mLog.d("position : " + selectedPosition);
-        mLog.d("Number of photos : " + mPhotosList.size());
 
         mPagerAdapter = new PhotosViewPagerAdapter();
         mViewPager.setAdapter(mPagerAdapter);
@@ -110,21 +116,38 @@ public class SlideShowDialogFragment extends DialogFragment {
             menu.findItem(R.id.action_save).setVisible(true);
             menu.findItem(R.id.action_unsave).setVisible(false);
         }
+
+        if (mDbUtil.checkFavorite(photoVo.id)) {
+            menu.findItem(R.id.action_add_favorite).setVisible(false);
+            menu.findItem(R.id.action_remove_favorite).setVisible(true);
+        } else {
+            menu.findItem(R.id.action_add_favorite).setVisible(true);
+            menu.findItem(R.id.action_remove_favorite).setVisible(false);
+        }
+
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_save:
-                        mDbUtil.insert(photoVo);
+                        mDbUtil.insert(photoVo, Constants.SAVE);
+                        mEventBus.post(new SaveOrFavChangeEvent(Constants.SAVE));
                         Toast.makeText(getActivity(), R.string.saved, Toast.LENGTH_LONG).show();
                         return true;
                     case R.id.action_unsave:
                         mDbUtil.delete(photoVo.id);
+                        mEventBus.post(new SaveOrFavChangeEvent(Constants.UNSAVE));
                         Toast.makeText(getActivity(), R.string.unsaved, Toast.LENGTH_LONG).show();
                         return true;
-                    case R.id.action_add_favourite:
-                        Toast.makeText(getActivity(), "Added to favourites", Toast.LENGTH_LONG).show();
+                    case R.id.action_add_favorite:
+                        mDbUtil.addOrRemoveFavorite(photoVo, Constants.ADD_FAVORITE);
+                        mEventBus.post(new SaveOrFavChangeEvent(Constants.ADD_FAVORITE));
+                        Toast.makeText(getActivity(), getString(R.string.added_to_favorites), Toast.LENGTH_LONG).show();
                         return true;
+                    case R.id.action_remove_favorite:
+                        mDbUtil.addOrRemoveFavorite(photoVo, Constants.REMOVE_FAVORITE);
+                        mEventBus.post(new SaveOrFavChangeEvent(Constants.REMOVE_FAVORITE));
+                        Toast.makeText(getActivity(), getString(R.string.removed_from_favorites), Toast.LENGTH_LONG).show();
                     default:
                 }
                 return false;

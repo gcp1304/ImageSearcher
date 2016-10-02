@@ -37,14 +37,10 @@ public class ItemsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     public static class ItemViewHolder extends RecyclerView.ViewHolder {
         public ImageView thumbnail;
-        public ImageView overflow;
-        public TextView tags;
 
         public ItemViewHolder(View itemView) {
             super(itemView);
             thumbnail = (ImageView) itemView.findViewById(R.id.thumbnail);
-            overflow = (ImageView) itemView.findViewById(R.id.overflow);
-            tags = (TextView) itemView.findViewById(R.id.itemName);
         }
     }
 

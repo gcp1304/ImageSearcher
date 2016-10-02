@@ -13,9 +13,15 @@
         android:visible="false"/>
 
     <item
-        android:id="@+id/action_add_favourite"
+        android:id="@+id/action_add_favorite"
         android:orderInCategory="101"
-        android:title="@string/action_add_favourite" />
+        android:title="@string/action_add_favorite" />
+
+    <item
+        android:id="@+id/action_remove_favorite"
+        android:orderInCategory="101"
+        android:title="@string/action_remove_favorite"
+        android:visible="false"/>
 
 
 </menu>

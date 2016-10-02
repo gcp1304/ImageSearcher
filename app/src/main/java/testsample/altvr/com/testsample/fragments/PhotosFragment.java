@@ -22,6 +22,7 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 
+import testsample.altvr.com.testsample.Constants;
 import testsample.altvr.com.testsample.R;
 import testsample.altvr.com.testsample.activities.MainActivity;
 import testsample.altvr.com.testsample.adapter.ItemsListAdapter;
@@ -49,6 +50,8 @@ public class PhotosFragment extends Fragment{
     public static PhotosFragment newInstance() {
         return new PhotosFragment();
     }
+
+    public PhotosFragment() {}
 
     @Override
     public void onAttach(Activity activity) {
@@ -102,7 +105,7 @@ public class PhotosFragment extends Fragment{
         RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getActivity(), 2);
         itemsListRecyclerView.setLayoutManager(mLayoutManager);
         itemsListRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        mListAdapter = new ItemsListAdapter(mItemsData, getResources().getDisplayMetrics().widthPixels, getContext());
+        mListAdapter = new ItemsListAdapter(mItemsData, getResources().getDisplayMetrics().widthPixels, getActivity());
         itemsListRecyclerView.setAdapter(mListAdapter);
 
         itemsListRecyclerView.addOnItemTouchListener(new ItemsListAdapter.RecyclerTouchListener(
@@ -169,7 +172,7 @@ public class PhotosFragment extends Fragment{
             mCallback.onEventOccurred(getResources().getString(R.string.no_results_found));
 
         }
-        mItemsData.addAll(mDatabaseUtil.getAllPhotos());
+        mItemsData.addAll(mDatabaseUtil.getAllPhotos(Constants.ALL));
         mListAdapter.notifyDataSetChanged();
 
     }
@@ -187,7 +190,7 @@ public class PhotosFragment extends Fragment{
         if (event.errorDescription.equals(getString(R.string.network_error))) {
             fetchingItems.setVisibility(View.GONE);
             mItemsData.clear();
-            mItemsData.addAll(mDatabaseUtil.getAllPhotos());
+            mItemsData.addAll(mDatabaseUtil.getAllPhotos(Constants.ALL));
             mListAdapter.notifyDataSetChanged();
         }
     }

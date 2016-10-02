@@ -46,7 +46,8 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:textColor="@android:color/white"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:textSize="16dp"/>
 
         <TextView
             android:id="@+id/tags"

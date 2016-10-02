@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/favoritesEmptyView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:textAlignment="center"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/favEmptyTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:text="@string/favorite_empty_message"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            />
+
+
+        <Button
+            android:id="@+id/favPhotosButton"
+            android:text="@string/add_to_favorite_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/favEmptyTextView"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="12dp"
+            android:textColor="?attr/colorPrimaryDark"
+            android:background="?android:attr/selectableItemBackground"/>
+    </RelativeLayout>
+
+    <testsample.altvr.com.testsample.helper.EmptyRecyclerView
+        android:id="@+id/favoritePhotosRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </testsample.altvr.com.testsample.helper.EmptyRecyclerView>
+
+</LinearLayout>
