@@ -43,6 +43,7 @@ This project doesn't include any unit tests.
 ## Known Issues
 
 - This application crashes when screen is rotated during slide show mode. 
+- Not an issue, but not many comments have been added into project.
 
 ## Contributors
 
